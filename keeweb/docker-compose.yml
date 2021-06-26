@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  server:
+    image: halverneus/static-file-server:latest
+    networks:
+      - traefik-public
+    volumes:
+      - /opt/share/parchmentmc/keeweb:/web
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.labels.system==production
+          - node.labels.type==worker
+          - node.labels.web==true
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.parchmentmc-keepass-http.rule=Host(`keepass.parchmentmc.org`) || Host(`keepass.parchmentmc.net`)
+        - traefik.http.routers.parchmentmc-keepass-http.entrypoints=http
+        - traefik.http.routers.parchmentmc-keepass-http.middlewares=https-redirect
+        - traefik.http.routers.parchmentmc-keepass-https.rule=Host(`keepass.parchmentmc.org`) || Host(`keepass.parchmentmc.net`)
+        - traefik.http.routers.parchmentmc-keepass-https.entrypoints=https
+        - traefik.http.routers.parchmentmc-keepass-https.tls=true
+        - traefik.http.routers.parchmentmc-keepass-https.service=parchmentmc-keepass
+        - traefik.http.routers.parchmentmc-keepass-https.tls.certresolver=le
+        - traefik.http.services.parchmentmc-keepass.loadbalancer.server.port=8080
+
+networks:
+  traefik-public:
+    external: true
