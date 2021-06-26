@@ -19,3 +19,7 @@ run
 staging
 input
 repo
+
+../data/..
+../secrets/..
+../local/..
