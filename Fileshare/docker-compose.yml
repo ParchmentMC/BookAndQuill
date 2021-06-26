@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  webdav:
+    image: bytemark/webdav
+    entrypoint: "cp /run/secrets/parchmentmc_fileshare_credentials /user.passwd && docker-entrypoint.sh httpd-foreground"
+    networks:
+      - traefik-public
+    secrets:
+      - parchmentmc_fileshare_credentials
+    volumes:
+      - /opt/share/parchmentmc/fileshare/data:/var/lib/dav/data
+    environment:
+      SERVER_NAMES: fileshare.parchmentmc.org,fileshare.parchmentmc.net
+      REALM: ParchmentMC FileShare
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.labels.system==production
+          - node.labels.type==worker
+          - node.labels.web==true
+      labels:
+        - traefik.enable=true
+        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=traefik-public
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.middlewares.parchmentmc-fileshare-headers.headers.accesscontrolalloworiginlist=*
+        - traefik.http.middlewares.parchmentmc-fileshare-headers.headers.accesscontrolallowcredentials=true
+        - traefik.http.middlewares.parchmentmc-fileshare-headers.headers.accesscontrolallowmethods=*
+        - traefik.http.middlewares.parchmentmc-fileshare-headers.headers.accessControlAllowHeaders=*
+        - traefik.http.routers.parchmentmc-fileshare-http.rule=Host(`fileshare.parchmentmc.org`) || Host(`fileshare.parchmentmc.org`)
+        - traefik.http.routers.parchmentmc-fileshare-http.entrypoints=http
+        - traefik.http.routers.parchmentmc-fileshare-http.middlewares=https-redirect
+        - traefik.http.routers.parchmentmc-fileshare-https.rule=Host(`fileshare.parchmentmc.org`) || Host(`fileshare.parchmentmc.org`)
+        - traefik.http.routers.parchmentmc-fileshare-https.entrypoints=https
+        - traefik.http.routers.parchmentmc-fileshare-https.tls=true
+        - traefik.http.routers.parchmentmc-fileshare-https.service=parchmentmc-fileshare
+        - traefik.http.routers.parchmentmc-fileshare-https.tls.certresolver=le
+        - traefik.http.routers.parchmentmc-fileshare-https.middlewares=parchmentmc-fileshare-headers
+        - traefik.http.services.parchmentmc-fileshare.loadbalancer.server.port=80
+
+secrets:
+  parchmentmc_fileshare_credentials:
+    external: true
+
+networks:
+  traefik-public:
+    external: true
