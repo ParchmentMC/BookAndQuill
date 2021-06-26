@@ -3,7 +3,7 @@ version: "3.8"
 services:
   webdav:
     image: bytemark/webdav
-    entrypoint: "cp /run/secrets/parchmentmc_fileshare_credentials /user.passwd && docker-entrypoint.sh httpd-foreground"
+    entrypoint: "bash -c 'cp /run/secrets/parchmentmc_fileshare_credentials /user.passwd && docker-entrypoint.sh httpd-foreground'"
     networks:
       - traefik-public
     secrets:
