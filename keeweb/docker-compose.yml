@@ -21,10 +21,10 @@ services:
         - traefik.docker.network=traefik-public
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
-        - traefik.http.routers.parchmentmc-keepass-http.rule=Host(`keepass.parchmentmc.org`) || Host(`keepass.parchmentmc.net`)
+        - traefik.http.routers.parchmentmc-keepass-http.rule=Host(`keeweb.parchmentmc.org`) || Host(`keeweb.parchmentmc.net`)
         - traefik.http.routers.parchmentmc-keepass-http.entrypoints=http
         - traefik.http.routers.parchmentmc-keepass-http.middlewares=https-redirect
-        - traefik.http.routers.parchmentmc-keepass-https.rule=Host(`keepass.parchmentmc.org`) || Host(`keepass.parchmentmc.net`)
+        - traefik.http.routers.parchmentmc-keepass-https.rule=Host(`keeweb.parchmentmc.org`) || Host(`keeweb.parchmentmc.net`)
         - traefik.http.routers.parchmentmc-keepass-https.entrypoints=https
         - traefik.http.routers.parchmentmc-keepass-https.tls=true
         - traefik.http.routers.parchmentmc-keepass-https.service=parchmentmc-keepass
